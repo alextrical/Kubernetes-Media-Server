@@ -1,0 +1,6 @@
+name: kubernetes-py-jellyfin
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A installation of Jellyfin chart
