@@ -4,21 +4,21 @@ import pulumi_kubernetes as kubernetes
 namespace = "media"
 
 #----------namespace----------
-media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
-    api_version="v1",
-    kind="Namespace",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        name=namespace,
-    ))
+# media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
+#     api_version="v1",
+#     kind="Namespace",
+#     metadata=kubernetes.meta.v1.ObjectMetaArgs(
+#         name=namespace,
+#     ))
 
-#----------jellyfin----------
-jellyfin_labels = {"app": "jellyfin"}
-jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("jellyfin-conf-pvc",
+#----------radarr----------
+radarr_labels = {"app": "radarr"}
+radarr_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("radarr-conf-pvc",
     api_version="v1",
     kind="PersistentVolumeClaim",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin-conf-pvc",
+        labels=radarr_labels,
+        name="radarr-conf-pvc",
         namespace=namespace,
     ),
     spec=kubernetes.core.v1.PersistentVolumeClaimSpecArgs(
@@ -31,26 +31,26 @@ jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeCla
         ),
     ))
 
-jellyfin = kubernetes.apps.v1.Deployment(
-	"jellyfin",
+radarr = kubernetes.apps.v1.Deployment(
+	"radarr",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin",
+        labels=radarr_labels,
+        name="radarr",
         namespace=namespace,
     ),
 	spec=kubernetes.apps.v1.DeploymentSpecArgs(
 		replicas=1,
 		selector=kubernetes.meta.v1.LabelSelectorArgs(
-			match_labels=jellyfin_labels,
+			match_labels=radarr_labels,
 		),
 		template=kubernetes.core.v1.PodTemplateSpecArgs(
 			metadata=kubernetes.meta.v1.ObjectMetaArgs(
-				labels=jellyfin_labels,
+				labels=radarr_labels,
 			),
 			spec=kubernetes.core.v1.PodSpecArgs(
 				containers=[kubernetes.core.v1.ContainerArgs(
-					name="jellyfin",
-					image="lscr.io/linuxserver/jellyfin",
+					name="radarr",
+					image="lscr.io/linuxserver/radarr",
 					resources=kubernetes.core.v1.ResourceRequirementsArgs(
 						requests={
 							"cpu": "100m",
@@ -67,7 +67,7 @@ jellyfin = kubernetes.apps.v1.Deployment(
 						    value="1000",
 					    ),
                         #kubernetes.core.v1.EnvVarArgs(
-                            #name="JELLYFIN_PublishedServerUrl",
+                            #name="radarr_PublishedServerUrl",
 						    #value="192.168.0.5" #optional
 					    #),
                         kubernetes.core.v1.EnvVarArgs(						
@@ -77,34 +77,34 @@ jellyfin = kubernetes.apps.v1.Deployment(
                     ],
                     volume_mounts=[{
                         "mount_path": "/config",
-                        "name": "jellyfin-conf-pvc",
+                        "name": "radarr-conf-pvc",
                     }],
 					ports=[kubernetes.core.v1.ContainerPortArgs(
-						container_port=8096,
+						container_port=7878,
 					)],
 				)],
                 volumes=[kubernetes.core.v1.VolumeArgs(
-                    name="jellyfin-conf-pvc",
+                    name="radarr-conf-pvc",
                     persistent_volume_claim={
-                        "claim_name": "jellyfin-conf-pvc",
+                        "claim_name": "radarr-conf-pvc",
                     },
                 )],
 			),
 		),
 	))
 
-jellyfin_service = kubernetes.core.v1.Service(
-	"jellyfin",
+radarr_service = kubernetes.core.v1.Service(
+	"radarr",
 	metadata=kubernetes.meta.v1.ObjectMetaArgs(
-		name="jellyfin",
-		labels=jellyfin_labels,
+		name="radarr",
+		labels=radarr_labels,
         namespace=namespace,
 	),
 	spec=kubernetes.core.v1.ServiceSpecArgs(
 		type="ClusterIP",
 		ports=[kubernetes.core.v1.ServicePortArgs(
-			port=8096,
-			#target_port=8096,
+			port=7878,
+			#target_port=7878,
 		)],
-		selector=jellyfin_labels,
+		selector=radarr_labels,
 	))

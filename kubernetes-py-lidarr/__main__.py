@@ -4,21 +4,21 @@ import pulumi_kubernetes as kubernetes
 namespace = "media"
 
 #----------namespace----------
-media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
-    api_version="v1",
-    kind="Namespace",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        name=namespace,
-    ))
+# media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
+#     api_version="v1",
+#     kind="Namespace",
+#     metadata=kubernetes.meta.v1.ObjectMetaArgs(
+#         name=namespace,
+#     ))
 
-#----------jellyfin----------
-jellyfin_labels = {"app": "jellyfin"}
-jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("jellyfin-conf-pvc",
+#----------lidarr----------
+lidarr_labels = {"app": "lidarr"}
+lidarr_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("lidarr-conf-pvc",
     api_version="v1",
     kind="PersistentVolumeClaim",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin-conf-pvc",
+        labels=lidarr_labels,
+        name="lidarr-conf-pvc",
         namespace=namespace,
     ),
     spec=kubernetes.core.v1.PersistentVolumeClaimSpecArgs(
@@ -31,26 +31,26 @@ jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeCla
         ),
     ))
 
-jellyfin = kubernetes.apps.v1.Deployment(
-	"jellyfin",
+lidarr = kubernetes.apps.v1.Deployment(
+	"lidarr",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin",
+        labels=lidarr_labels,
+        name="lidarr",
         namespace=namespace,
     ),
 	spec=kubernetes.apps.v1.DeploymentSpecArgs(
 		replicas=1,
 		selector=kubernetes.meta.v1.LabelSelectorArgs(
-			match_labels=jellyfin_labels,
+			match_labels=lidarr_labels,
 		),
 		template=kubernetes.core.v1.PodTemplateSpecArgs(
 			metadata=kubernetes.meta.v1.ObjectMetaArgs(
-				labels=jellyfin_labels,
+				labels=lidarr_labels,
 			),
 			spec=kubernetes.core.v1.PodSpecArgs(
 				containers=[kubernetes.core.v1.ContainerArgs(
-					name="jellyfin",
-					image="lscr.io/linuxserver/jellyfin",
+					name="lidarr",
+					image="lscr.io/linuxserver/lidarr",
 					resources=kubernetes.core.v1.ResourceRequirementsArgs(
 						requests={
 							"cpu": "100m",
@@ -67,7 +67,7 @@ jellyfin = kubernetes.apps.v1.Deployment(
 						    value="1000",
 					    ),
                         #kubernetes.core.v1.EnvVarArgs(
-                            #name="JELLYFIN_PublishedServerUrl",
+                            #name="lidarr_PublishedServerUrl",
 						    #value="192.168.0.5" #optional
 					    #),
                         kubernetes.core.v1.EnvVarArgs(						
@@ -77,34 +77,34 @@ jellyfin = kubernetes.apps.v1.Deployment(
                     ],
                     volume_mounts=[{
                         "mount_path": "/config",
-                        "name": "jellyfin-conf-pvc",
+                        "name": "lidarr-conf-pvc",
                     }],
 					ports=[kubernetes.core.v1.ContainerPortArgs(
-						container_port=8096,
+						container_port=8686,
 					)],
 				)],
                 volumes=[kubernetes.core.v1.VolumeArgs(
-                    name="jellyfin-conf-pvc",
+                    name="lidarr-conf-pvc",
                     persistent_volume_claim={
-                        "claim_name": "jellyfin-conf-pvc",
+                        "claim_name": "lidarr-conf-pvc",
                     },
                 )],
 			),
 		),
 	))
 
-jellyfin_service = kubernetes.core.v1.Service(
-	"jellyfin",
+lidarr_service = kubernetes.core.v1.Service(
+	"lidarr",
 	metadata=kubernetes.meta.v1.ObjectMetaArgs(
-		name="jellyfin",
-		labels=jellyfin_labels,
+		name="lidarr",
+		labels=lidarr_labels,
         namespace=namespace,
 	),
 	spec=kubernetes.core.v1.ServiceSpecArgs(
 		type="ClusterIP",
 		ports=[kubernetes.core.v1.ServicePortArgs(
-			port=8096,
-			#target_port=8096,
+			port=8686,
+			#target_port=8686,
 		)],
-		selector=jellyfin_labels,
+		selector=lidarr_labels,
 	))

@@ -1,0 +1,6 @@
+name: kubernetes-py-sonarr
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A installation of sonarr chart

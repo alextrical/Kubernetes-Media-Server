@@ -4,21 +4,21 @@ import pulumi_kubernetes as kubernetes
 namespace = "media"
 
 #----------namespace----------
-media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
-    api_version="v1",
-    kind="Namespace",
-    metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        name=namespace,
-    ))
+# media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
+#     api_version="v1",
+#     kind="Namespace",
+#     metadata=kubernetes.meta.v1.ObjectMetaArgs(
+#         name=namespace,
+#     ))
 
-#----------jellyfin----------
-jellyfin_labels = {"app": "jellyfin"}
-jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("jellyfin-conf-pvc",
+#----------overseerr----------
+overseerr_labels = {"app": "overseerr"}
+overseerr_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim("overseerr-conf-pvc",
     api_version="v1",
     kind="PersistentVolumeClaim",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin-conf-pvc",
+        labels=overseerr_labels,
+        name="overseerr-conf-pvc",
         namespace=namespace,
     ),
     spec=kubernetes.core.v1.PersistentVolumeClaimSpecArgs(
@@ -31,26 +31,26 @@ jellyfin_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeCla
         ),
     ))
 
-jellyfin = kubernetes.apps.v1.Deployment(
-	"jellyfin",
+overseerr = kubernetes.apps.v1.Deployment(
+	"overseerr",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
-        labels=jellyfin_labels,
-        name="jellyfin",
+        labels=overseerr_labels,
+        name="overseerr",
         namespace=namespace,
     ),
 	spec=kubernetes.apps.v1.DeploymentSpecArgs(
 		replicas=1,
 		selector=kubernetes.meta.v1.LabelSelectorArgs(
-			match_labels=jellyfin_labels,
+			match_labels=overseerr_labels,
 		),
 		template=kubernetes.core.v1.PodTemplateSpecArgs(
 			metadata=kubernetes.meta.v1.ObjectMetaArgs(
-				labels=jellyfin_labels,
+				labels=overseerr_labels,
 			),
 			spec=kubernetes.core.v1.PodSpecArgs(
 				containers=[kubernetes.core.v1.ContainerArgs(
-					name="jellyfin",
-					image="lscr.io/linuxserver/jellyfin",
+					name="overseerr",
+					image="lscr.io/linuxserver/overseerr",
 					resources=kubernetes.core.v1.ResourceRequirementsArgs(
 						requests={
 							"cpu": "100m",
@@ -67,7 +67,7 @@ jellyfin = kubernetes.apps.v1.Deployment(
 						    value="1000",
 					    ),
                         #kubernetes.core.v1.EnvVarArgs(
-                            #name="JELLYFIN_PublishedServerUrl",
+                            #name="overseerr_PublishedServerUrl",
 						    #value="192.168.0.5" #optional
 					    #),
                         kubernetes.core.v1.EnvVarArgs(						
@@ -77,34 +77,34 @@ jellyfin = kubernetes.apps.v1.Deployment(
                     ],
                     volume_mounts=[{
                         "mount_path": "/config",
-                        "name": "jellyfin-conf-pvc",
+                        "name": "overseerr-conf-pvc",
                     }],
 					ports=[kubernetes.core.v1.ContainerPortArgs(
-						container_port=8096,
+						container_port=5055,
 					)],
 				)],
                 volumes=[kubernetes.core.v1.VolumeArgs(
-                    name="jellyfin-conf-pvc",
+                    name="overseerr-conf-pvc",
                     persistent_volume_claim={
-                        "claim_name": "jellyfin-conf-pvc",
+                        "claim_name": "overseerr-conf-pvc",
                     },
                 )],
 			),
 		),
 	))
 
-jellyfin_service = kubernetes.core.v1.Service(
-	"jellyfin",
+overseerr_service = kubernetes.core.v1.Service(
+	"overseerr",
 	metadata=kubernetes.meta.v1.ObjectMetaArgs(
-		name="jellyfin",
-		labels=jellyfin_labels,
+		name="overseerr",
+		labels=overseerr_labels,
         namespace=namespace,
 	),
 	spec=kubernetes.core.v1.ServiceSpecArgs(
 		type="ClusterIP",
 		ports=[kubernetes.core.v1.ServicePortArgs(
-			port=8096,
-			#target_port=8096,
+			port=5055,
+			#target_port=5055,
 		)],
-		selector=jellyfin_labels,
+		selector=overseerr_labels,
 	))

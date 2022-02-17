@@ -1,0 +1,6 @@
+name: kubernetes-py-overseerr
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A installation of overseerr chart
