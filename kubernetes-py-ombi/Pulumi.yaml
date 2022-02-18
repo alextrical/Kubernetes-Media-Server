@@ -1,6 +1,0 @@
-name: kubernetes-py-ombi
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: A installation of ombi chart

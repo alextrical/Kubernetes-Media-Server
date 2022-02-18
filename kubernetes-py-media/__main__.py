@@ -1,17 +1,22 @@
 #import pulumi
 import pulumi_kubernetes as kubernetes
 
-application_data = [["application", "port"],
-			["transmission",9091],
-			["jackett",9117],
-			["jellyfin",8096],
-			["lidarr",8686],
-			["ombi",3579],
-			["overseerr",5055],
-			["radarr",7878],
-			["sonarr",8989]]
-
 namespace = "media"
+domain_name = "test.example.com"
+
+application_data =	[
+					["application",	"port"],
+					["transmission",9091],
+					["jackett",		9117],
+					["jellyfin",	8096],
+					["lidarr",		8686],
+					["ombi",		3579],
+					["overseerr",	5055],
+					["radarr",		7878],
+					["sonarr",		8989]]
+
+
+							#kubernetes.core.v1.EnvVarArgs(name="JELLYFIN_PublishedServerUrl",value="192.168.0.5"),
 
 # ----------namespace----------
 media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
@@ -79,14 +84,11 @@ for row in application_data[1:]:        # iterate through application_data, skip
 								name="PGID",
 								value="1000",
 							),
-							#kubernetes.core.v1.EnvVarArgs(
-								#name="JELLYFIN_PublishedServerUrl",
-								#value="192.168.0.5" #optional
-							#),
-							kubernetes.core.v1.EnvVarArgs(						
+							kubernetes.core.v1.EnvVarArgs(
 								name="TZ",
 								value="Europe/London",
-							)
+							),
+							
 						],
 						volume_mounts=[{
 							"mount_path": "/config",

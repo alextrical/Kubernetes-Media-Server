@@ -1,6 +1,0 @@
-name: kubernetes-py-radarr
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: A installation of radarr chart
