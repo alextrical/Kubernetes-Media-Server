@@ -12,116 +12,77 @@ const isMinikube = config.getBoolean("isMinikube");
 // REDIS LEADER.
 //
 
-const redisLeaderLabels = { app: "redis-leader" };
-const redisLeaderDeployment = new k8s.apps.v1.Deployment("redis-leader", {
+const jackettLabels = { app: "jackett" };
+const jackettDeployment = new k8s.apps.v1.Deployment("jackett", {
     spec: {
-        selector: { matchLabels: redisLeaderLabels },
+        selector: { matchLabels: jackettLabels },
         template: {
-            metadata: { labels: redisLeaderLabels },
+            metadata: { labels: jackettLabels },
             spec: {
                 containers: [
                     {
-                        name: "redis-leader",
-                        image: "redis",
+                        name: "jackett",
+                        image: "lscr.io/linuxserver/jackett",
                         resources: { requests: { cpu: "100m", memory: "100Mi" } },
-                        ports: [{ containerPort: 6379 }],
+                        ports: [{ containerPort: 9117 }],
                     },
                 ],
             },
         },
     },
 });
-const redisLeaderService = new k8s.core.v1.Service("redis-leader", {
+const jackettService = new k8s.core.v1.Service("jackett", {
     metadata: {
-        name: "redis-leader",
-        labels: redisLeaderDeployment.metadata.labels,
+        name: "jackett",
+        labels: jackettDeployment.metadata.labels,
     },
     spec: {
         ports: [{ port: 6379, targetPort: 6379 }],
-        selector: redisLeaderDeployment.spec.template.metadata.labels,
+        selector: jackettDeployment.spec.template.metadata.labels,
     },
 });
 
-//
-// REDIS REPLICA.
-//
-
-const redisReplicaLabels = { app: "redis-replica" };
-const redisReplicaDeployment = new k8s.apps.v1.Deployment("redis-replica", {
-    spec: {
-        selector: { matchLabels: redisReplicaLabels },
-        template: {
-            metadata: { labels: redisReplicaLabels },
-            spec: {
-                containers: [
-                    {
-                        name: "replica",
-                        image: "pulumi/guestbook-redis-replica",
-                        resources: { requests: { cpu: "100m", memory: "100Mi" } },
-                        // If your cluster config does not include a dns service, then to instead access an environment
-                        // variable to find the leader's host, change `value: "dns"` to read `value: "env"`.
-                        env: [{ name: "GET_HOSTS_FROM", value: "dns" }],
-                        ports: [{ containerPort: 6379 }],
-                    },
-                ],
-            },
-        },
-    },
-});
-const redisReplicaService = new k8s.core.v1.Service("redis-replica", {
+const jackettIngress = new k8s.apiextensions.CustomResource(`jackett-ingress-route`, {
+    apiVersion: 'traefik.containo.us/v1alpha1',
+    kind: 'IngressRoute',
     metadata: {
-        name: "redis-replica",
-        labels: redisReplicaDeployment.metadata.labels
+        //namespace: args.namespace
+        labels: jackettDeployment.metadata.labels,
     },
     spec: {
-        ports: [{ port: 6379, targetPort: 6379 }],
-        selector: redisReplicaDeployment.spec.template.metadata.labels,
+        entryPoints: ['websecure'],
+        routes: [{
+            match: `PathPrefix(\`"jackett"\`)`,
+            kind: 'Rule',
+            middlewares: [
+                // {name: trailingSlashMiddleware.metadata.name},
+                // {name: stripPrefixMiddleware.metadata.name},
+            ],
+            services: [{
+                name: pulumi.output(args.service).metadata.name,
+                //port: pulumi.output(args.service).spec.ports[0].port,
+            }],
+        }]
     },
 });
 
-//
-// FRONTEND
-//
-
-const frontendLabels = { app: "frontend" };
-const frontendDeployment = new k8s.apps.v1.Deployment("frontend", {
-    spec: {
-        selector: { matchLabels: frontendLabels },
-        replicas: 3,
-        template: {
-            metadata: { labels: frontendLabels },
-            spec: {
-                containers: [
-                    {
-                        name: "frontend",
-                        image: "pulumi/guestbook-php-redis",
-                        resources: { requests: { cpu: "100m", memory: "100Mi" } },
-                        // If your cluster config does not include a dns service, then to instead access an environment
-                        // variable to find the master service's host, change `value: "dns"` to read `value: "env"`.
-                        env: [{ name: "GET_HOSTS_FROM", value: "dns" /* value: "env"*/ }],
-                        ports: [{ containerPort: 80 }],
-                    },
-                ],
-            },
-        },
-    },
-});
-const frontendService = new k8s.core.v1.Service("frontend", {
-    metadata: {
-        labels: frontendDeployment.metadata.labels,
-        name: "frontend",
-    },
-    spec: {
-        type: isMinikube ? "ClusterIP" : "LoadBalancer",
-        ports: [{ port: 80 }],
-        selector: frontendDeployment.spec.template.metadata.labels,
-    },
-});
-
-// Export the frontend IP.
-export let frontendIp: pulumi.Output<string>;
-if (isMinikube) {
-    frontendIp = frontendService.spec.clusterIP;
-} else {
-    frontendIp = frontendService.status.loadBalancer.ingress[0].ip;
-}
+// new k8s.apiextensions.CustomResource(`${name}-ingress-route`, {
+//     apiVersion: 'traefik.containo.us/v1alpha1',
+//     kind: 'IngressRoute',
+//     metadata: {namespace: args.namespace},
+//     spec: {
+//         entryPoints: ['web'],
+//         routes: [{
+//             match: `PathPrefix(\`${args.prefix}\`)`,
+//             kind: 'Rule',
+//             middlewares: [
+//                 // {name: trailingSlashMiddleware.metadata.name},
+//                 // {name: stripPrefixMiddleware.metadata.name},
+//             ],
+//             services: [{
+//                 name: pulumi.output(args.service).metadata.name,
+//                 port: pulumi.output(args.service).spec.ports[0].port,
+//             }],
+//         }]
+//     },
+// }, {provider: opts?.provider,});

@@ -11,7 +11,9 @@ import * as pulumi from "@pulumi/pulumi";
 export class ServiceDeployment extends pulumi.ComponentResource {
     public readonly deployment: k8s.apps.v1.Deployment;
     public readonly service: k8s.core.v1.Service;
+    public readonly customResource: k8s.apiextensions.CustomResource;
     public readonly ipAddress?: pulumi.Output<string>;
+    public readonly namespace?: string;
 
     constructor(name: string, args: ServiceDeploymentArgs, opts?: pulumi.ComponentResourceOptions) {
         super("k8sjs:service:ServiceDeployment", name, {}, opts);
@@ -23,6 +25,7 @@ export class ServiceDeployment extends pulumi.ComponentResource {
             resources: args.resources || { requests: { cpu: "100m", memory: "100Mi" } },
             env: [args.env || { name: "GET_HOSTS_FROM", value: "dns" },{name: "PGID", value: "1000"},{name: "PUID", value: "1000"},{name: "TZ", value: "Europe/London"},],
             ports: args.ports && args.ports.map(p => ({ containerPort: p })),
+            //namespace: args.namespace,
         };
         this.deployment = new k8s.apps.v1.Deployment(name, {
             spec: {
@@ -51,6 +54,40 @@ export class ServiceDeployment extends pulumi.ComponentResource {
                 //type: args.allocateIpAddress ? (args.isMinikube ? "ClusterIP" : "LoadBalancer") : undefined,
             },
         }, { parent: this });
+        
+
+
+
+        // this.customResource = new k8s.apiextensions.CustomResource(name, {
+        //     apiVersion: 'traefik.containo.us/v1alpha1',
+        //     kind: 'IngressRoute',
+        //     metadata: {
+        //         name: name,
+        //         labels: this.deployment.metadata.labels,
+        //         namespace: args.namespace,
+        //     },
+        //     spec: {
+        //         entryPoints: ['websecure'],
+        //         routes: [{
+        //             match: `PathPrefix(\``+name+`\`)`,
+        //             kind: 'Rule',
+        //             middlewares: [
+        //                 // {name: trailingSlashMiddleware.metadata.name},
+        //                 // {name: stripPrefixMiddleware.metadata.name},
+        //             ],
+        //             services: [{
+        //                 //name: pulumi.output(args.service).metadata.name,
+        //                 //port: pulumi.output(args.service).spec.ports[0].port,
+        //                 name: name,
+        //                 port: args.ports,
+        //             }],
+        //         }]
+        //     },
+        // }, { parent: this });
+
+
+
+
 
         // if (args.allocateIpAddress) {
         //     this.ipAddress = args.isMinikube ?

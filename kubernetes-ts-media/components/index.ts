@@ -13,53 +13,59 @@ const emby = new k8sjs.ServiceDeployment("emby", {
     namespace: "media",
 });
 
-const sonarr = new k8sjs.ServiceDeployment("sonarr", {
-    image: "lscr.io/linuxserver/sonarr",
-    ports: [8989],
-    namespace: "media",
-});
+// const sonarr = new k8sjs.ServiceDeployment("sonarr", {
+//     image: "lscr.io/linuxserver/sonarr",
+//     ports: [8989],
+//     namespace: "media",
+// });
 
-const radarr = new k8sjs.ServiceDeployment("radarr", {
-    image: "lscr.io/linuxserver/radarr",
-    ports: [7878],
-    namespace: "media",
-});
+// const jackett = new k8sjs.ServiceDeployment("jackett", {
+//     image: "lscr.io/linuxserver/jackett",
+//     ports: [9117],
+//     namespace: "media",
+// });
 
-const ombi = new k8sjs.ServiceDeployment("ombi", {
-    image: "lscr.io/linuxserver/ombi",
-    ports: [3579],
-    namespace: "media",
-});
+// const radarr = new k8sjs.ServiceDeployment("radarr", {
+//     image: "lscr.io/linuxserver/radarr",
+//     ports: [7878],
+//     namespace: "media",
+// });
 
-const transmission = new k8sjs.ServiceDeployment("transmission", {
-    image: "lscr.io/linuxserver/transmission",
-    ports: [9091],
-    namespace: "media",
-});
+// const ombi = new k8sjs.ServiceDeployment("ombi", {
+//     image: "lscr.io/linuxserver/ombi",
+//     ports: [3579],
+//     namespace: "media",
+// });
 
-const jellyfin  = new k8sjs.ServiceDeployment("jellyfin", {
-    image: "lscr.io/linuxserver/jellyfin",
-    ports: [8096],
-    namespace: "media",
-});
+// const transmission = new k8sjs.ServiceDeployment("transmission", {
+//     image: "lscr.io/linuxserver/transmission",
+//     ports: [9091],
+//     namespace: "media",
+// });
 
-const lidarr  = new k8sjs.ServiceDeployment("lidarr", {
-    image: "lscr.io/linuxserver/lidarr",
-    ports: [8686],
-    namespace: "media",
-});
+// const jellyfin  = new k8sjs.ServiceDeployment("jellyfin", {
+//     image: "lscr.io/linuxserver/jellyfin",
+//     ports: [8096],
+//     namespace: "media",
+// });
 
-const overseerr  = new k8sjs.ServiceDeployment("overseerr", {
-    image: "lscr.io/linuxserver/overseerr",
-    ports: [5055],
-    namespace: "media",
-});
+// const lidarr  = new k8sjs.ServiceDeployment("lidarr", {
+//     image: "lscr.io/linuxserver/lidarr",
+//     ports: [8686],
+//     namespace: "media",
+// });
 
-const organizr  = new k8sjs.ServiceDeployment("organizr", {
-    image: "organizr/organizr",
-    ports: [80],
-    namespace: "media",
-});
+// const overseerr  = new k8sjs.ServiceDeployment("overseerr", {
+//     image: "lscr.io/linuxserver/overseerr",
+//     ports: [5055],
+//     namespace: "media",
+// });
+
+// const organizr  = new k8sjs.ServiceDeployment("organizr", {
+//     image: "organizr/organizr",
+//     ports: [80],
+//     namespace: "media",
+// });
 
 // const radarr = new k8sjs.ServiceDeployment("radarr", {
 //     //replicas: 1,
