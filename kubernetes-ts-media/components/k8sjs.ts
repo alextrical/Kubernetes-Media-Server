@@ -27,6 +27,7 @@ export class ServiceDeployment extends pulumi.ComponentResource {
             // env: [args.env || { name: "GET_HOSTS_FROM", value: "dns" },{name: "PGID", value: "1000"},{name: "PUID", value: "1000"},{name: "TZ", value: "Europe/London"},],
             ports: args.ports && args.ports.map(p => ({ containerPort: p })),
             //namespace: args.namespace,
+			//volumeMounts: [{ name: "emby-config", mountPath: "/config" }],
         };
         this.deployment = new k8s.apps.v1.Deployment(name, {
             spec: {
@@ -37,7 +38,13 @@ export class ServiceDeployment extends pulumi.ComponentResource {
                         labels: labels, 
                         // namespace: args.namespace 
                     },
-                    spec: { containers: [ container ] },
+                    spec: { containers: [ container ]
+						//restartPolicy: Always --need to add something like this here!!
+						//volumes:
+							//- name: emby-config
+							  //persistentVolumeClaim:
+								//claimName: emby-config
+					},
                 },
             },
         }, { parent: this });
