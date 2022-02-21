@@ -11,9 +11,9 @@ import * as pulumi from "@pulumi/pulumi";
 export class ServiceDeployment extends pulumi.ComponentResource {
     public readonly deployment: k8s.apps.v1.Deployment;
     public readonly service: k8s.core.v1.Service;
-    public readonly customResource: k8s.apiextensions.CustomResource;
     public readonly ipAddress?: pulumi.Output<string>;
-    public readonly namespace?: string;
+    // public readonly customResource: k8s.apiextensions.CustomResource;
+    // public readonly namespace?: string;
 
     constructor(name: string, args: ServiceDeploymentArgs, opts?: pulumi.ComponentResourceOptions) {
         super("k8sjs:service:ServiceDeployment", name, {}, opts);
@@ -23,7 +23,8 @@ export class ServiceDeployment extends pulumi.ComponentResource {
             name,
             image: args.image,
             resources: args.resources || { requests: { cpu: "100m", memory: "100Mi" } },
-            env: [args.env || { name: "GET_HOSTS_FROM", value: "dns" },{name: "PGID", value: "1000"},{name: "PUID", value: "1000"},{name: "TZ", value: "Europe/London"},],
+            env: [{ name: "GET_HOSTS_FROM", value: "dns" }],
+            // env: [args.env || { name: "GET_HOSTS_FROM", value: "dns" },{name: "PGID", value: "1000"},{name: "PUID", value: "1000"},{name: "TZ", value: "Europe/London"},],
             ports: args.ports && args.ports.map(p => ({ containerPort: p })),
             //namespace: args.namespace,
         };
@@ -34,7 +35,8 @@ export class ServiceDeployment extends pulumi.ComponentResource {
                 template: {
                     metadata: { 
                         labels: labels, 
-                        namespace: args.namespace },
+                        // namespace: args.namespace 
+                    },
                     spec: { containers: [ container ] },
                 },
             },
@@ -44,7 +46,7 @@ export class ServiceDeployment extends pulumi.ComponentResource {
             metadata: {
                 name: name,
                 labels: this.deployment.metadata.labels,
-                namespace: args.namespace,
+                // namespace: args.namespace,
             },
             spec: {
                 ports: args.ports && args.ports.map(p => ({ port: p, targetPort: p })),
@@ -54,9 +56,6 @@ export class ServiceDeployment extends pulumi.ComponentResource {
                 //type: args.allocateIpAddress ? (args.isMinikube ? "ClusterIP" : "LoadBalancer") : undefined,
             },
         }, { parent: this });
-        
-
-
 
         // this.customResource = new k8s.apiextensions.CustomResource(name, {
         //     apiVersion: 'traefik.containo.us/v1alpha1',
@@ -85,10 +84,6 @@ export class ServiceDeployment extends pulumi.ComponentResource {
         //     },
         // }, { parent: this });
 
-
-
-
-
         // if (args.allocateIpAddress) {
         //     this.ipAddress = args.isMinikube ?
         //         this.service.spec.clusterIP :
@@ -100,13 +95,13 @@ export class ServiceDeployment extends pulumi.ComponentResource {
 export interface ServiceDeploymentArgs {
     image: string;
     resources?: k8stypes.core.v1.ResourceRequirements;
-    env?: k8stypes.core.v1.EnvVar;
+    // env?: k8stypes.core.v1.EnvVar;
     replicas?: number;
     ports?: number[];
     //allocateIpAddress?: boolean;
     //isMinikube?: boolean;
 
-    namespace?: string;
+    // namespace?: string;
     //prefix?: pulumi.Input<string>;
     //service?: pulumi.Input<k8s.core.v1.Service>;
 }

@@ -2,15 +2,23 @@
 
 import * as pulumi from "@pulumi/pulumi";
 import * as k8sjs from "./k8sjs";
+import * as k8s from "@pulumi/kubernetes";
 
 const config = new pulumi.Config();
+const name_space = "media";
+
+// Create a Kubernetes Namespace
+const ns = new k8s.core.v1.Namespace(name_space, {}, {});
+
+// Export the Namespace name
+export const namespaceName = ns.metadata.name;
 
 const emby = new k8sjs.ServiceDeployment("emby", {
     image: "lscr.io/linuxserver/emby",
     ports: [8096],
     resources: { requests: { cpu: "100m", memory: "100Mi" }, limits: { cpu: "500m", memory: "500Mi" } },
-    env:{ name: "PUID", value: "1000" },  //Need to figure out how to get this to work with more than 1 arg
-    namespace: "media",
+    // env:{ name: "PUID", value: "1000" },  //Need to figure out how to get this to work with more than 1 arg
+    // namespace: "media",
 });
 
 // const sonarr = new k8sjs.ServiceDeployment("sonarr", {

@@ -5,14 +5,16 @@ domain_name = "test.example.com"
 
 application_data =	[
 					["application","port",	"namespace"	],
-					["transmission",9091,	"media"		],
-					["jackett",		9117,	"media"		],
-					["jellyfin",	8096,	"media"		],
-					["lidarr",		8686,	"media"		],
-					["ombi",		3579,	"media"		],
-					["overseerr",	5055,	"media"		],
-					["radarr",		7878,	"media"		],
-					["sonarr",		8989,	"media"		]]
+					# ["transmission",9091,	"media"		],
+					# ["jackett",		9117,	"media"		],
+					# ["jellyfin",	8096,	"media"		],
+					# ["lidarr",		8686,	"media"		],
+					# ["ombi",		3579,	"media"		],
+					# ["overseerr",	5055,	"media"		],
+					# ["radarr",		7878,	"media"		],
+					["emby",		8096,	"media"		],
+					# ["sonarr",		8989,	"media"		],
+					]
 
 
 							#kubernetes.core.v1.EnvVarArgs(name="JELLYFIN_PublishedServerUrl",value="192.168.0.5"),
@@ -20,8 +22,11 @@ application_data =	[
 
 
 for row in application_data[1:]:        # iterate through application_data, skipping the header row
+	application = row[0]
+	port = row[1]
+	namespace = row[2]
 
-		# ----------namespace----------
+	# ----------namespace----------
 	media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
 		api_version="v1",
 		kind="Namespace",
@@ -30,10 +35,6 @@ for row in application_data[1:]:        # iterate through application_data, skip
 		))
 
 	# ----------application----------
-	application = row[0]
-	port = row[1]
-	namespace = row[2]
-
 	application_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim(application+"-conf-pvc",
 		api_version="v1",
 		kind="PersistentVolumeClaim",
