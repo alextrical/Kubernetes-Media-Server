@@ -1,6 +1,6 @@
-name: kubernetes-py-media
+name: kubernetes-py-media-server
 runtime:
   name: python
   options:
     virtualenv: venv
-description: A installation of Media server charts
+description: Kubernetes media server based on https:// docker guide

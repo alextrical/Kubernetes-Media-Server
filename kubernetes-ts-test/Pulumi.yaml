@@ -1,8 +1,0 @@
-name: test-easy
-runtime: nodejs
-description: Kubernetes test
-template:
-  config:
-    isMinikube:
-      description: Whether you are deploying to minikube
-      default: true

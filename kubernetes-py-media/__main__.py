@@ -1,128 +1,36 @@
+#  Copyright 2016-2020, Pulumi Corporation.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pulumi
-import pulumi_kubernetes as kubernetes
+from service_deployment import ServiceDeployment
 
-domain_name = "test.example.com"
+ServiceDeployment(
+    "jackett",
+    image="lscr.io/linuxserver/jackett",
+    ports=[9117],
+    resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+    namespace="media"
+    )
+# ServiceDeployment(
+#     "sonarr",
+#     image="lscr.io/linuxserver/sonarr",
+#     ports=[8989])
+# frontend = ServiceDeployment(
+#     "frontend",
+#     image="pulumi/guestbook-php-redis",
+#     replicas=3,
+#     ports=[80],
+#     allocate_ip_address=True)
 
-application_data =	[
-					["application","port",	"namespace"	],
-					# ["transmission",9091,	"media"		],
-					# ["jackett",		9117,	"media"		],
-					# ["jellyfin",	8096,	"media"		],
-					# ["lidarr",		8686,	"media"		],
-					# ["ombi",		3579,	"media"		],
-					# ["overseerr",	5055,	"media"		],
-					# ["radarr",		7878,	"media"		],
-					["emby",		8096,	"media"		],
-					# ["sonarr",		8989,	"media"		],
-					]
-
-
-							#kubernetes.core.v1.EnvVarArgs(name="JELLYFIN_PublishedServerUrl",value="192.168.0.5"),
-
-
-
-for row in application_data[1:]:        # iterate through application_data, skipping the header row
-	application = row[0]
-	port = row[1]
-	namespace = row[2]
-
-	# ----------namespace----------
-	media_namespace = kubernetes.core.v1.Namespace("media-Namespace",
-		api_version="v1",
-		kind="Namespace",
-		metadata=kubernetes.meta.v1.ObjectMetaArgs(
-			name=namespace,
-		))
-
-	# ----------application----------
-	application_config_persistent_volume_claim = kubernetes.core.v1.PersistentVolumeClaim(application+"-conf-pvc",
-		api_version="v1",
-		kind="PersistentVolumeClaim",
-		metadata=kubernetes.meta.v1.ObjectMetaArgs(
-			labels={"app": application},
-			name=application+"-conf-pvc",
-			namespace=namespace,
-		),
-		spec=kubernetes.core.v1.PersistentVolumeClaimSpecArgs(
-			access_modes=["ReadWriteOnce"],
-			#storage_class_name="longhorn",
-			resources=kubernetes.core.v1.ResourceRequirementsArgs(
-				requests={
-					"storage": "1Gi",
-				},
-			),
-		))
-	
-	application_deployment = kubernetes.apps.v1.Deployment(
-		application,
-		metadata=kubernetes.meta.v1.ObjectMetaArgs(
-			labels={"app": application},
-			name=application,
-			namespace=namespace,
-		),
-		spec=kubernetes.apps.v1.DeploymentSpecArgs(
-			replicas=1,
-			selector=kubernetes.meta.v1.LabelSelectorArgs(
-				match_labels={"app": application},
-			),
-			template=kubernetes.core.v1.PodTemplateSpecArgs(
-				metadata=kubernetes.meta.v1.ObjectMetaArgs(
-					labels={"app": application},
-				),
-				spec=kubernetes.core.v1.PodSpecArgs(
-					containers=[kubernetes.core.v1.ContainerArgs(
-						name=application,
-						image="lscr.io/linuxserver/"+application,
-						resources=kubernetes.core.v1.ResourceRequirementsArgs(
-							requests={
-								"cpu": "100m",
-								"memory": "100Mi",
-							},
-						),
-						env=[
-							kubernetes.core.v1.EnvVarArgs(						
-								name="PUID",
-								value="1000",
-							),
-							kubernetes.core.v1.EnvVarArgs(						
-								name="PGID",
-								value="1000",
-							),
-							kubernetes.core.v1.EnvVarArgs(
-								name="TZ",
-								value="Europe/London",
-							),
-							
-						],
-						volume_mounts=[{
-							"mount_path": "/config",
-							"name": application+"-conf-pvc",
-						}],
-						ports=[kubernetes.core.v1.ContainerPortArgs(
-							container_port=port,
-						)],
-					)],
-					volumes=[kubernetes.core.v1.VolumeArgs(
-						name=application+"-conf-pvc",
-						persistent_volume_claim={
-							"claim_name": application+"-conf-pvc",
-						},
-					)],
-				),
-			),
-		))
-	
-	application_service = kubernetes.core.v1.Service(
-		application,
-		metadata=kubernetes.meta.v1.ObjectMetaArgs(
-			name=application,
-			labels={"app": application},
-			namespace=namespace,
-		),
-		spec=kubernetes.core.v1.ServiceSpecArgs(
-			type="ClusterIP",
-			ports=[kubernetes.core.v1.ServicePortArgs(
-				port=port,
-			)],
-			selector={"app": application},
-		))
+# pulumi.export("frontend_ip", frontend.ip_address)
