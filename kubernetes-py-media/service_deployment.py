@@ -13,6 +13,9 @@
 #  limitations under the License.
 
 from argparse import Namespace
+from ast import Pass
+from asyncio.windows_events import NULL
+from contextlib import nullcontext
 from typing import Sequence
 
 import pulumi
@@ -31,7 +34,6 @@ from pulumi_kubernetes.core.v1 import (
 )
 from pulumi_kubernetes.meta.v1 import LabelSelectorArgs, ObjectMetaArgs
 
-
 class ServiceDeployment(ComponentResource):
     deployment: Deployment
     service: Service
@@ -41,6 +43,7 @@ class ServiceDeployment(ComponentResource):
                 self, 
                 name: str, 
                 image: str,
+                env: EnvVarArgs = None,
                 namespace: str = None,
                 resources: ResourceRequirementsArgs = None, 
                 replicas: int = None,
@@ -54,18 +57,13 @@ class ServiceDeployment(ComponentResource):
         container = ContainerArgs(
             name=name,
             image=image,
-            #namespace=namespace,
             resources=resources or ResourceRequirementsArgs(
                 requests={
                     "cpu": "100m",
                     "memory": "100Mi"
                 },
             ),
-            env=[
-                EnvVarArgs(name="PUID",value="1000",), #need to fugure out how to pipe this in from a var!!
-                EnvVarArgs(name="PGID",value="1000",), #need to fugure out how to pipe this in from a var!!
-                EnvVarArgs(name="TZ",value="Europe/London",), #need to fugure out how to pipe this in from a var!!
-            ],
+            env=env if env else None,
             ports=[ContainerPortArgs(container_port=p) for p in ports] if ports else None,
         )
         self.deployment = Deployment(

@@ -20,7 +20,8 @@ ServiceDeployment(
     image="lscr.io/linuxserver/jackett",
     ports=[9117],
     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
-    namespace="media"
+    namespace="media",
+    env=[{"name":"PUID","value":"1000"},{"name":"PGID","value":"1000"},{"name":"TZ","value":"Europe/London"}],
     )
 # ServiceDeployment(
 #     "sonarr",
