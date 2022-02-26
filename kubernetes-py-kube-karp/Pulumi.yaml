@@ -1,0 +1,6 @@
+name: kubernetes-py-kube-karp
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A minimal Python Pulumi program
