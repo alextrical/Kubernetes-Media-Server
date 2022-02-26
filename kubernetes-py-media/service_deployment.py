@@ -21,6 +21,7 @@ from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
 from pulumi_kubernetes.core.v1 import (
     ContainerArgs,
     ContainerPortArgs,
+	EnvVarArgs,
     PodSpecArgs,
     PodTemplateSpecArgs,
     ResourceRequirementsArgs,
@@ -60,6 +61,11 @@ class ServiceDeployment(ComponentResource):
                     "memory": "100Mi"
                 },
             ),
+            env=[
+                EnvVarArgs(name="PUID",value="1000",), #need to fugure out how to pipe this in from a var!!
+                EnvVarArgs(name="PGID",value="1000",), #need to fugure out how to pipe this in from a var!!
+                EnvVarArgs(name="TZ",value="Europe/London",), #need to fugure out how to pipe this in from a var!!
+            ],
             ports=[ContainerPortArgs(container_port=p) for p in ports] if ports else None,
         )
         self.deployment = Deployment(

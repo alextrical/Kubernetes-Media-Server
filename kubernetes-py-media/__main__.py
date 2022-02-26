@@ -25,7 +25,62 @@ ServiceDeployment(
 # ServiceDeployment(
 #     "sonarr",
 #     image="lscr.io/linuxserver/sonarr",
-#     ports=[8989])
+#     ports=[8989],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "radarr",
+#     image="lscr.io/linuxserver/radarr",
+#     ports=[7878],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "ombi",
+#     image="lscr.io/linuxserver/ombi",
+#     ports=[7878],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "transmission",
+#     image="lscr.io/linuxserver/transmission",
+#     ports=[9091],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "jellyfin",
+#     image="lscr.io/linuxserver/jellyfin",
+#     ports=[8096],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "lidarr",
+#     image="lscr.io/linuxserver/lidarr",
+#     ports=[8686],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "overseerr",
+#     image="lscr.io/linuxserver/overseerr",
+#     ports=[5055],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+# ServiceDeployment(
+#     "organizr",
+#     image="organizr/organizr",
+#     ports=[80],
+#     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
+#     namespace="media"
+#     )
+
+
+
 # frontend = ServiceDeployment(
 #     "frontend",
 #     image="pulumi/guestbook-php-redis",
