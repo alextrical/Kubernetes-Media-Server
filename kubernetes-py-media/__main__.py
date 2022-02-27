@@ -22,6 +22,8 @@ ServiceDeployment(
     resources= { "requests": { "cpu": "100m", "memory": "100Mi" }, "limits": { "cpu": "500m", "memory": "500Mi" } },
     namespace="media",
     env=[{"name":"PUID","value":"1000"},{"name":"PGID","value":"1000"},{"name":"TZ","value":"Europe/London"}],
+    volumes=[{"mountPath":"/data","name":"jackett-config","type":"configMap"}],
+    configmap1_name="jackett-config",
     )
 # ServiceDeployment(
 #     "sonarr",

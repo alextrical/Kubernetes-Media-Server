@@ -16,12 +16,14 @@ from argparse import Namespace
 from ast import Pass
 from asyncio.windows_events import NULL
 from contextlib import nullcontext
+from importlib.metadata import metadata
 from typing import Sequence
 
 import pulumi
 from pulumi import ResourceOptions, ComponentResource, Output
 from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
 from pulumi_kubernetes.core.v1 import (
+    ConfigMap,
     ContainerArgs,
     ContainerPortArgs,
 	EnvVarArgs,
@@ -31,6 +33,7 @@ from pulumi_kubernetes.core.v1 import (
     Service,
     ServicePortArgs,
     ServiceSpecArgs,
+    outputs,
 )
 from pulumi_kubernetes.meta.v1 import LabelSelectorArgs, ObjectMetaArgs
 
@@ -43,13 +46,15 @@ class ServiceDeployment(ComponentResource):
                 self, 
                 name: str, 
                 image: str,
+                configmap1_name: str = None,
                 env: EnvVarArgs = None,
+                volumes: outputs.Volume = None,
                 namespace: str = None,
                 resources: ResourceRequirementsArgs = None, 
                 replicas: int = None,
                 ports: Sequence[int] = None, 
-                allocate_ip_address: bool = None,
-                is_minikube: bool = None, 
+                # allocate_ip_address: bool = None,
+                # is_minikube: bool = None, 
                 opts: ResourceOptions = None):
         super().__init__('k8sx:component:ServiceDeployment', name, {}, opts)
 
@@ -69,8 +74,8 @@ class ServiceDeployment(ComponentResource):
         self.deployment = Deployment(
             name,
             metadata=ObjectMetaArgs(
-                namespace=namespace,
                 name=name,
+                namespace=namespace,
             ),
             spec=DeploymentSpecArgs(
                 selector=LabelSelectorArgs(match_labels=labels),
@@ -81,7 +86,9 @@ class ServiceDeployment(ComponentResource):
                         name=name,
                         namespace=namespace,
                         ),
-                    spec=PodSpecArgs(containers=[container]),
+                    spec=PodSpecArgs(containers=[container],
+                        volumes=volumes,
+                    ),
                 ),
             ),
             opts=pulumi.ResourceOptions(parent=self))
@@ -98,6 +105,14 @@ class ServiceDeployment(ComponentResource):
                 #type=("ClusterIP" if is_minikube else "LoadBalancer") if allocate_ip_address else None,
             ),
             opts=pulumi.ResourceOptions(parent=self))
+        self.configmap = ConfigMap(
+            name,
+            metadata=ObjectMetaArgs(
+                name=configmap1_name,
+                namespace=namespace,
+            ),
+            opts=pulumi.ResourceOptions(parent=self)
+        ) if configmap1_name else None
         # if allocate_ip_address:
         #     if is_minikube:
         #         self.ip_address = self.service.spec.apply(lambda s: s.cluster_ip)

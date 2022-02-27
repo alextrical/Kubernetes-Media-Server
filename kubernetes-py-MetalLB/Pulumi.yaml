@@ -1,0 +1,6 @@
+name: kubernetes-py-MetalLB
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Kubernetes MetalLB install

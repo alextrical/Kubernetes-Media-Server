@@ -1,0 +1,6 @@
+name: kubernetes-py-longhorn
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Kubernetes longhorn install
